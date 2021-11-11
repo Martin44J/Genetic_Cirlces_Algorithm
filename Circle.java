@@ -13,7 +13,6 @@ public class Circle{
   private int[] yGenes;
   private int fitness;
   private int maxVecLength;
-  private int currentGene;
   private int geneLength;
   private boolean reachedGoal;
 
@@ -26,7 +25,6 @@ public class Circle{
     reachedGoal = false;
 
     maxVecLength = 20;
-    currentGene = 0;
     xGenes = new int[geneLength];
     yGenes = new int[geneLength];
 
@@ -43,7 +41,7 @@ public class Circle{
 
   }
 
-  public Circle(int xInit, int yInit, int geneLength, int[] xGenes, int yGenes[]){
+  public Circle(int xInit, int yInit, int geneLength, int[] xGenes, int[] yGenes){
     this.x = xInit;
     this.y = yInit;
     this.xInit = xInit;
@@ -52,7 +50,6 @@ public class Circle{
     reachedGoal = false;
 
     maxVecLength = 20;
-    currentGene = 0;
     this.xGenes = xGenes;
     this.yGenes = yGenes;
 
@@ -61,7 +58,7 @@ public class Circle{
 
   }
 
-  public void move(){
+  public void move(int currentGene){
     if(currentGene<geneLength){
       if(x+ xGenes[currentGene] < 1000 && x+ xGenes[currentGene]>0 ){
         x+= xGenes[currentGene];
@@ -74,8 +71,12 @@ public class Circle{
     currentGene++;
   }
 
-  public boolean generationOver(){
-    return currentGene>geneLength || reachedGoal;
+  // public boolean generationOver(){
+  //   return currentGene>geneLength || reachedGoal;
+  // }
+
+  public boolean reachedGoal(){
+    return reachedGoal;
   }
 
   public double calcFitness(){
@@ -83,7 +84,8 @@ public class Circle{
     Double distanceToGoal = Math.sqrt(Math.pow(x-500,2) + Math.pow(y-30,2));
     int height = yInit - 30;
     double normalised = height/ distanceToGoal;
-    return Math.round((normalised)*100.0)/100.0;
+    double fitness = Math.round((normalised)*100.0)/100.0;
+    return fitness;
   }
 
   public void drawMe(Graphics g){
@@ -111,6 +113,19 @@ public class Circle{
 
     return new Circle(xInit, yInit, geneLength, newXGenes, newYGenes);
   }
+
+  public void mutate(){
+    //from 1 - 10 mutations
+    int numMutations = (int)(Math.random()*10) +1;
+
+    for (int i = 0; i<numMutations; i++){
+      //for each mutation change some random index of both the x and y genes to a random number
+      xGenes[(int)(Math.random() * geneLength)] = (int)(Math.random() * 2*maxVecLength)-maxVecLength;
+      yGenes[(int)(Math.random() * geneLength)] = (int)(Math.random() * 2*maxVecLength)-maxVecLength;
+
+    }
+  }
+
 
   public int[] getXGenes(){
     return xGenes;

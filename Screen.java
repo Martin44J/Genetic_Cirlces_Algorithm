@@ -24,13 +24,14 @@ public class Screen extends JPanel implements ActionListener {
   private int yInitial;
   private int generationNumber;
   private boolean animationLive;
+  private double averageFitness;
 
   public Screen(){
   	setLayout(null);
 
     generationNumber= 0;
-    generationSize = 200;
-    geneLength = 100;
+    generationSize = 100;
+    geneLength = 150;
     xInitial = 448;
     yInitial = 990;
     currentGeneration = new Circle[generationSize];
@@ -64,12 +65,16 @@ public class Screen extends JPanel implements ActionListener {
 
     //draw the generations
     g.setColor(new Color(42, 174, 250));
-    for(int i =0; i<generationSize; i++){
+
+    for(int i =0; i<currentGeneration.length; i++){
      currentGeneration[i].drawMe(g);
     }
 
+
+
     g.setColor(Color.BLACK);
     g.drawString("Generation #" + generationNumber, 10, 10);
+    g.drawString("Average Fitness: " + averageFitness, 10, 20);
 
   }
 
@@ -80,13 +85,12 @@ public void actionPerformed(ActionEvent e){
 }
 
 public void setUpNextGeneration(){
-  System.out.println("Setting up next generation.");
   ArrayList<Circle> listOfAllPossibleParents = getListOfAllPossibleParents();
   ArrayList<Circle> actualParents = new ArrayList<Circle>();
 
-  //select random 200 to be parents
+  //select random generationSize*2 to be parents
   if(listOfAllPossibleParents.size()>generationSize*2){
-    //select random 200.
+    //select random generationSize*2.
     for(int i =0; i<generationSize*2; i++){
       int rand = (int)(Math.random() * listOfAllPossibleParents.size());
       actualParents.add(listOfAllPossibleParents.get(rand));
@@ -97,6 +101,12 @@ public void setUpNextGeneration(){
 
   currentGeneration = breedChildren(actualParents);
   generationNumber++;
+
+  //System.out.println("Size of Population:\t" + currentGeneration.length);
+  // System.out.println("Size of Possible parents list:\t" + listOfAllPossibleParents.size());
+  // System.out.println("totalFitness:\t"+totalFitness);
+  // System.out.println("Average Fitness:\t" + totalFitness/(currentGeneration.length));
+  // System.out.println();
 
   animationLive = true;
   animate();
@@ -115,7 +125,8 @@ public Circle[] breedChildren(ArrayList<Circle> parentsList){
     Circle dad = parentsList.get(dadIndex);
 
     Circle child = mom.crossover(dad);
-    System.out.println("m: " + momIndex + " d: " +  dadIndex + " " +child);
+    child.mutate();
+    // System.out.println("m: " + momIndex + " d: " +  dadIndex + " " +child);
     childrenList[i] = child;
   }
   return childrenList;
@@ -127,13 +138,17 @@ public ArrayList<Circle> getListOfAllPossibleParents(){
 
 
   ArrayList<Circle> listOfAllPossibleParents = new ArrayList<Circle>();
+  double totalFitness = 0;
 
-  for(int i =0; i<generationSize; i++){
+  for(int i =0; i<currentGeneration.length; i++){
     Double fitness = currentGeneration[i].calcFitness();
+    totalFitness += fitness;
+    averageFitness = totalFitness/generationSize;
+    repaint();
     // System.out.println("Fitness of this mf:" + fitness);
 
     //num times based on 2^fitness this is how likely it essentially will be that it gets picked
-    int numTimesInArray = (int)(Math.pow(2,fitness*10));
+    int numTimesInArray = (int)(fitness*10);
 
     for(int j =0; j<numTimesInArray; j++){
       //add that many iterations of the parent to the pool of parents to be chosen.
@@ -141,6 +156,8 @@ public ArrayList<Circle> getListOfAllPossibleParents(){
     }
 
   }
+  
+  System.out.println(listOfAllPossibleParents.size());
   return listOfAllPossibleParents;
 }
 
@@ -148,26 +165,23 @@ public void animate(){
   while(animationLive){
     // System.out.println("annimating");
 
-    for(int i =0; i< generationSize; i++){
-      if(currentGeneration[i].generationOver()){
-        System.out.println("Generation over");
-        setUpNextGeneration();
-        animationLive = false;
-        break;
-      }else{
-        currentGeneration[i].move();
+    for(int j =0; j< geneLength; j++){
+      for(int i =0; i< currentGeneration.length; i++){
+        if(!currentGeneration[i].reachedGoal()){
+          currentGeneration[i].move(j);
+          repaint();
+        }
+      }
+      try {
+        Thread.sleep(12);
+      } catch(InterruptedException ex) {
+        Thread.currentThread().interrupt();
       }
     }
+    
 
-
-
-    try {
-        Thread.sleep(50);
-    } catch(InterruptedException ex) {
-        Thread.currentThread().interrupt();
-    }
-    repaint();
-
+    animationLive = false;
+    setUpNextGeneration();
   }
 }
 
