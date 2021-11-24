@@ -17,11 +17,11 @@ import java.util.ArrayList;
 public class Screen extends JPanel implements ActionListener {
 
 
-  private int generationSize;
-  private int geneLength;
+  private static int generationSize;
+  private static int geneLength;
   private Circle[] currentGeneration;
-  private int xInitial;
-  private int yInitial;
+  private static int xInitial;
+  private static int yInitial;
   private int generationNumber;
   private boolean animationLive;
   private double averageFitness;
@@ -40,7 +40,6 @@ public class Screen extends JPanel implements ActionListener {
     for(int i =0; i< generationSize; i++){
       Circle temp = new Circle(xInitial, yInitial,geneLength);
       currentGeneration[i] = temp;
-      // System.out.println(currentGeneration[i].toString());
     }
 
 
@@ -63,8 +62,12 @@ public class Screen extends JPanel implements ActionListener {
     g.setColor(new Color(235, 136, 38));
     g.fillRect(480,10, 40, 40);
 
+    g.setColor(Color.BLACK);
+    g.fillRect(300, 450, 400, 25);
+    g.drawLine(0,550,1000,550);
+
+
     //draw the generations
-    g.setColor(new Color(42, 174, 250));
 
     for(int i =0; i<currentGeneration.length; i++){
      currentGeneration[i].drawMe(g);
@@ -102,12 +105,6 @@ public void setUpNextGeneration(){
   currentGeneration = breedChildren(actualParents);
   generationNumber++;
 
-  //System.out.println("Size of Population:\t" + currentGeneration.length);
-  // System.out.println("Size of Possible parents list:\t" + listOfAllPossibleParents.size());
-  // System.out.println("totalFitness:\t"+totalFitness);
-  // System.out.println("Average Fitness:\t" + totalFitness/(currentGeneration.length));
-  // System.out.println();
-
   animationLive = true;
   animate();
 }
@@ -126,7 +123,6 @@ public Circle[] breedChildren(ArrayList<Circle> parentsList){
 
     Circle child = mom.crossover(dad);
     child.mutate();
-    // System.out.println("m: " + momIndex + " d: " +  dadIndex + " " +child);
     childrenList[i] = child;
   }
   return childrenList;
@@ -145,7 +141,6 @@ public ArrayList<Circle> getListOfAllPossibleParents(){
     totalFitness += fitness;
     averageFitness = totalFitness/generationSize;
     repaint();
-    // System.out.println("Fitness of this mf:" + fitness);
 
     //num times based on 2^fitness this is how likely it essentially will be that it gets picked
     int numTimesInArray = (int)(fitness*10);
@@ -156,14 +151,11 @@ public ArrayList<Circle> getListOfAllPossibleParents(){
     }
 
   }
-  
-  System.out.println(listOfAllPossibleParents.size());
   return listOfAllPossibleParents;
 }
 
 public void animate(){
   while(animationLive){
-    // System.out.println("annimating");
 
     for(int j =0; j< geneLength; j++){
       for(int i =0; i< currentGeneration.length; i++){
@@ -173,7 +165,7 @@ public void animate(){
         }
       }
       try {
-        Thread.sleep(12);
+        Thread.sleep(5);
       } catch(InterruptedException ex) {
         Thread.currentThread().interrupt();
       }

@@ -7,13 +7,12 @@ public class Circle{
 
   private int x;
   private int y;
-  private int yInit;
-  private int xInit;
+  private static int  yInit;
+  private static int  xInit;
   private int[] xGenes;
   private int[] yGenes;
-  private int fitness;
-  private int maxVecLength;
-  private int geneLength;
+  private static int maxVecLength;
+  private static int geneLength;
   private boolean reachedGoal;
 
   public Circle(int xInit, int yInit, int geneLength){
@@ -59,16 +58,18 @@ public class Circle{
   }
 
   public void move(int currentGene){
-    if(currentGene<geneLength){
+    if(currentGene<geneLength && !reachedGoal && !insideBox()){
       if(x+ xGenes[currentGene] < 1000 && x+ xGenes[currentGene]>0 ){
         x+= xGenes[currentGene];
       }if(y+ yGenes[currentGene] < 1000 && y+ yGenes[currentGene]>0){
         y+= yGenes[currentGene];
 
       }
-      // System.out.println("moving");
     }
-    currentGene++;
+  }
+
+  public boolean insideBox(){
+    return (x>300 && x<700 && y>450 && y < 475);
   }
 
   // public boolean generationOver(){
@@ -85,10 +86,27 @@ public class Circle{
     int height = yInit - 30;
     double normalised = height/ distanceToGoal;
     double fitness = Math.round((normalised)*100.0)/100.0;
+    if(y<450)
+      fitness++;
+    if(y<550)
+      fitness++;
+    if(y<350)
+      fitness++;
+    if(y<250)
+      fitness++;
+    if(reachedGoal)
+      fitness+=4;
+    if(insideBox())
+      fitness--;
     return fitness;
   }
 
   public void drawMe(Graphics g){
+    if(insideBox()){
+      g.setColor(Color.RED);
+    }else{
+      g.setColor(new Color(42, 174, 250));
+    }
     g.fillOval(x-2,y-2,10,10);
   }
 
